@@ -40,7 +40,7 @@ const schema = z.object({
     }
 });
 
-type FormData = z.infer<typeof schema>;
+type PatientFormData = z.infer<typeof schema>;
 
 const PatientForm = () => {
     const { id } = useParams();
@@ -49,7 +49,7 @@ const PatientForm = () => {
     const [tutors, setTutors] = useState<any[]>([]);
     const [isCustomColor, setIsCustomColor] = useState(false);
 
-    const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<FormData>({
+    const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<PatientFormData>({
         // @ts-ignore
         resolver: zodResolver(schema),
     });
@@ -95,7 +95,7 @@ const PatientForm = () => {
         }
     }, [isEdit, id, setValue]);
 
-    const onSubmit = async (data: FormData) => {
+    const onSubmit = async (data: PatientFormData) => {
         try {
             // If species is 'Otro', use custom_species as the actual species value sent to backend?
             // Or keep 'Otro' and add a new field? 
