@@ -32,20 +32,25 @@ async def init_db():
 async def create_initial_user():
     from app.core.security import get_password_hash # Import here to avoid circular depends if any
     
-    admin = await User.find_one(User.email == settings.ADMIN_EMAIL)
-    hashed = get_password_hash(settings.ADMIN_PASSWORD)
+    # Ensure no whitespace issues from Env Vars
+    admin_email = settings.ADMIN_EMAIL.strip()
+    admin_password = settings.ADMIN_PASSWORD.strip()
+    
+    admin = await User.find_one(User.email == admin_email)
+    hashed = get_password_hash(admin_password)
     
     if not admin:
         user = User(
             name="Administrador",
-            email=settings.ADMIN_EMAIL,
+            email=admin_email,
             password_hash=hashed,
             role="admin"
         )
         await user.insert()
-        print(f"--- Admin user created: {settings.ADMIN_EMAIL} ---")
+        print(f"--- Admin user created: {admin_email} ---")
     else:
         # Force update password to match current environment variable
         admin.password_hash = hashed
+        admin.email = admin_email # Ensure email matches sanitized version
         await admin.save()
-        print(f"--- Admin password updated for: {settings.ADMIN_EMAIL} ---")
+        print(f"--- Admin password updated for: {admin_email} ---")
