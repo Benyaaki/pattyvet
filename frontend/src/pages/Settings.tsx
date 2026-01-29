@@ -310,6 +310,120 @@ const UsersSettings = ({ currentUser }: any) => {
     );
 };
 
+/* ... (previous code) ... */
+
+const ImportSettings = () => {
+    const [file, setFile] = useState<File | null>(null);
+    const [importing, setImporting] = useState(false);
+    const [result, setResult] = useState<any>(null);
+
+    const handleImport = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        setImporting(true);
+        setResult(null);
+        try {
+            const { data } = await api.post('/import/csv', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+            setResult(data);
+            alert('Importación completada');
+            setFile(null);
+        } catch (error: any) {
+            console.error(error);
+            alert(error.response?.data?.detail || 'Error en la importación');
+        } finally {
+            setImporting(false);
+        }
+    };
+
+    return (
+        <div className="space-y-6">
+            <h2 className="text-xl font-bold text-gray-800 border-b pb-2">Importar Datos Masivos</h2>
+            <div className="bg-blue-50 p-4 rounded-lg border border-blue-100 mb-6">
+                <h3 className="font-semibold text-blue-900 mb-2">Instrucciones CSV</h3>
+                <p className="text-sm text-blue-800 mb-2">
+                    El archivo debe ser un CSV con las siguientes columnas (encabezados):
+                </p>
+                <ul className="list-disc list-inside text-sm text-blue-700 font-mono">
+                    <li>tutor_email (Requerido para identificar tutor)</li>
+                    <li>tutor_name (Requerido si es nuevo tutor)</li>
+                    <li>tutor_phone (Opcional)</li>
+                    <li>patient_name (Requerido)</li>
+                    <li>species (Perro, Gato, Otro)</li>
+                    <li>breed, sex, color (Opcional)</li>
+                </ul>
+            </div>
+
+            <form onSubmit={handleImport} className="space-y-4">
+                <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 flex flex-col items-center justify-center bg-gray-50 hover:bg-white transition-colors">
+                    <input
+                        type="file"
+                        accept=".csv"
+                        onChange={(e) => setFile(e.target.files?.[0] || null)}
+                        className="hidden"
+                        id="csv-upload"
+                    />
+                    <label htmlFor="csv-upload" className="cursor-pointer flex flex-col items-center">
+                        <Upload className="w-12 h-12 text-gray-400 mb-3" />
+                        <span className="text-gray-700 font-medium text-lg">
+                            {file ? file.name : 'Click para seleccionar archivo CSV'}
+                        </span>
+                        <span className="text-sm text-gray-500 mt-1">.csv (UTF-8)</span>
+                    </label>
+                </div>
+
+                <div className="flex justify-end">
+                    <button
+                        type="submit"
+                        disabled={!file || importing}
+                        className="btn-primary flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        {importing ? 'Procesando...' : 'Iniciar Importación'}
+                    </button>
+                </div>
+            </form>
+
+            {result && (
+                <div className="mt-8 bg-white border rounded-xl p-6 shadow-sm">
+                    <h3 className="text-lg font-bold text-gray-800 mb-4">Resultado de Importación</h3>
+                    <div className="grid grid-cols-3 gap-4 mb-4">
+                        <div className="bg-green-50 p-3 rounded-lg text-center">
+                            <div className="text-2xl font-bold text-green-700">{result.tutors_created}</div>
+                            <div className="text-xs text-green-600 font-medium">Tutores Creados</div>
+                        </div>
+                        <div className="bg-blue-50 p-3 rounded-lg text-center">
+                            <div className="text-2xl font-bold text-blue-700">{result.tutors_updated}</div>
+                            <div className="text-xs text-blue-600 font-medium">Tutores Actualizados</div>
+                        </div>
+                        <div className="bg-purple-50 p-3 rounded-lg text-center">
+                            <div className="text-2xl font-bold text-purple-700">{result.patients_created}</div>
+                            <div className="text-xs text-purple-600 font-medium">Pacientes Creados</div>
+                        </div>
+                    </div>
+
+                    {result.errors && result.errors.length > 0 && (
+                        <div className="mt-4">
+                            <h4 className="font-semibold text-red-700 mb-2">Errores ({result.errors.length})</h4>
+                            <div className="bg-red-50 p-3 rounded-lg border border-red-100 max-h-40 overflow-y-auto">
+                                <ul className="list-disc list-inside text-xs text-red-600 space-y-1">
+                                    {result.errors.map((err: string, i: number) => (
+                                        <li key={i}>{err}</li>
+                                    ))}
+                                </ul>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
+        </div>
+    );
+};
+
 /* --- Main Component --- */
 
 const Settings = () => {
@@ -334,6 +448,7 @@ const Settings = () => {
                         <TabButton id="templates" icon={Mail} label="Plantillas de Correo" active={activeTab} set={setActiveTab} />
                         <TabButton id="schedule" icon={Calendar} label="Horarios" active={activeTab} set={setActiveTab} />
                         <TabButton id="users" icon={Users} label="Usuarios y Acceso" active={activeTab} set={setActiveTab} />
+                        <TabButton id="import" icon={Upload} label="Importar Datos" active={activeTab} set={setActiveTab} />
                     </nav>
                 </div>
 
@@ -344,6 +459,7 @@ const Settings = () => {
                     {activeTab === 'templates' && <TemplatesSettings />}
                     {activeTab === 'schedule' && <ScheduleSettings />}
                     {activeTab === 'users' && <UsersSettings currentUser={user} />}
+                    {activeTab === 'import' && <ImportSettings />}
                 </div>
             </div>
 
