@@ -479,39 +479,40 @@ const ImportSettings = () => {
                         {importing ? 'Procesando...' : 'Iniciar Importación'}
                     </button>
                 </div>
+            </form>
 
-                {result && (
-                    <div className="mt-8 bg-white border rounded-xl p-6 shadow-sm">
-                        <h3 className="text-lg font-bold text-gray-800 mb-4">Resultado de Importación</h3>
-                        <div className="grid grid-cols-3 gap-4 mb-4">
-                            <div className="bg-green-50 p-3 rounded-lg text-center">
-                                <div className="text-2xl font-bold text-green-700">{result.tutors_created}</div>
-                                <div className="text-xs text-green-600 font-medium">Tutores Creados</div>
-                            </div>
-                            <div className="bg-blue-50 p-3 rounded-lg text-center">
-                                <div className="text-2xl font-bold text-blue-700">{result.tutors_updated}</div>
-                                <div className="text-xs text-blue-600 font-medium">Tutores Actualizados</div>
-                            </div>
-                            <div className="bg-purple-50 p-3 rounded-lg text-center">
-                                <div className="text-2xl font-bold text-purple-700">{result.patients_created}</div>
-                                <div className="text-xs text-purple-600 font-medium">Pacientes Creados</div>
+            {result && (
+                <div className="mt-8 bg-white border rounded-xl p-6 shadow-sm">
+                    <h3 className="text-lg font-bold text-gray-800 mb-4">Resultado de Importación</h3>
+                    <div className="grid grid-cols-3 gap-4 mb-4">
+                        <div className="bg-green-50 p-3 rounded-lg text-center">
+                            <div className="text-2xl font-bold text-green-700">{result.tutors_created}</div>
+                            <div className="text-xs text-green-600 font-medium">Tutores Creados</div>
+                        </div>
+                        <div className="bg-blue-50 p-3 rounded-lg text-center">
+                            <div className="text-2xl font-bold text-blue-700">{result.tutors_updated}</div>
+                            <div className="text-xs text-blue-600 font-medium">Tutores Actualizados</div>
+                        </div>
+                        <div className="bg-purple-50 p-3 rounded-lg text-center">
+                            <div className="text-2xl font-bold text-purple-700">{result.patients_created}</div>
+                            <div className="text-xs text-purple-600 font-medium">Pacientes Creados</div>
+                        </div>
+                    </div>
+
+                    {result.errors && result.errors.length > 0 && (
+                        <div className="mt-4">
+                            <h4 className="font-semibold text-red-700 mb-2">Errores ({result.errors.length})</h4>
+                            <div className="bg-red-50 p-3 rounded-lg border border-red-100 max-h-40 overflow-y-auto">
+                                <ul className="list-disc list-inside text-xs text-red-600 space-y-1">
+                                    {result.errors.map((err: string, i: number) => (
+                                        <li key={i}>{err}</li>
+                                    ))}
+                                </ul>
                             </div>
                         </div>
-
-                        {result.errors && result.errors.length > 0 && (
-                            <div className="mt-4">
-                                <h4 className="font-semibold text-red-700 mb-2">Errores ({result.errors.length})</h4>
-                                <div className="bg-red-50 p-3 rounded-lg border border-red-100 max-h-40 overflow-y-auto">
-                                    <ul className="list-disc list-inside text-xs text-red-600 space-y-1">
-                                        {result.errors.map((err: string, i: number) => (
-                                            <li key={i}>{err}</li>
-                                        ))}
-                                    </ul>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                )}
+                    )}
+                </div>
+            )}
         </div>
     );
 };
