@@ -157,11 +157,7 @@ async def update_consultation(
                     </div>
                     <p>Si no realizaste este cambio, por favor contáctanos de inmediato.</p>
                     """
-from app.services.email import send_email_sync
-from pydantic import BaseModel
-from beanie import PydanticObjectId
 
-# ... (omitted)
 
 # In update_consultation:
                     html_body = get_email_template("Cita Reagendada", html_content)
