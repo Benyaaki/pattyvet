@@ -155,24 +155,22 @@ const ConsultationForm = ({ patientId, consultation, onSuccess, onCancel }: any)
                         <button
                             type="button"
                             onClick={() => setValue('status', 'attended')}
-                            className={`flex-1 py-2 px-3 rounded-lg border text-sm font-medium transition-all flex items-center justify-center space-x-2 ${
-                                currentStatus === 'attended'
-                                ? 'bg-green-50 border-green-500 text-green-700 ring-1 ring-green-500'
-                                : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
-                            }`}
+                            className={`flex-1 py-2 px-3 rounded-lg border text-sm font-medium transition-all flex items-center justify-center space-x-2 ${currentStatus === 'attended'
+                                    ? 'bg-green-50 border-green-500 text-green-700 ring-1 ring-green-500'
+                                    : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
+                                }`}
                         >
                             <span className="w-2 h-2 rounded-full bg-green-500"></span>
                             <span>Sí, asistió</span>
                         </button>
-                        
+
                         <button
                             type="button"
                             onClick={() => setValue('status', 'no_show')}
-                            className={`flex-1 py-2 px-3 rounded-lg border text-sm font-medium transition-all flex items-center justify-center space-x-2 ${
-                                currentStatus === 'no_show'
-                                ? 'bg-red-50 border-red-500 text-red-700 ring-1 ring-red-500'
-                                : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
-                            }`}
+                            className={`flex-1 py-2 px-3 rounded-lg border text-sm font-medium transition-all flex items-center justify-center space-x-2 ${currentStatus === 'no_show'
+                                    ? 'bg-red-50 border-red-500 text-red-700 ring-1 ring-red-500'
+                                    : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
+                                }`}
                         >
                             <span className="w-2 h-2 rounded-full bg-red-500"></span>
                             <span>No asistió</span>
@@ -181,16 +179,14 @@ const ConsultationForm = ({ patientId, consultation, onSuccess, onCancel }: any)
                         <button
                             type="button"
                             onClick={() => setValue('status', 'scheduled')}
-                            className={`flex-1 py-2 px-3 rounded-lg border text-sm font-medium transition-all flex items-center justify-center space-x-2 ${
-                                currentStatus === 'scheduled' || !currentStatus
-                                ? 'bg-blue-50 border-blue-500 text-blue-700 ring-1 ring-blue-500'
-                                : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
-                            }`}
+                            className={`flex-1 py-2 px-3 rounded-lg border text-sm font-medium transition-all flex items-center justify-center space-x-2 ${currentStatus === 'scheduled' || !currentStatus
+                                    ? 'bg-blue-50 border-blue-500 text-blue-700 ring-1 ring-blue-500'
+                                    : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
+                                }`}
                         >
                             <span className="w-2 h-2 rounded-full bg-blue-500"></span>
                             <span>Pendiente / No responder</span>
                         </button>
-                    </div>
                     </div>
                 </div>
                 <div>
@@ -221,7 +217,7 @@ const ConsultationForm = ({ patientId, consultation, onSuccess, onCancel }: any)
                     />
                 </div>
 
-                {/* Image Upload Section */ }
+                {/* Image Upload Section */}
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Imágenes de Consulta</label>
                     <input
