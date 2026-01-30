@@ -43,13 +43,14 @@ def send_email_sync(to_email: str, subject: str, body: str, html_body: str = Non
         
         # SMTP Connection Logic with Timeout
         timeout = 15 # seconds
-        if settings.MAIL_SSL_TLS:
+        # Force SSL if port is 465, regardless of flag (common misconfiguration)
+        if settings.MAIL_SSL_TLS or port == 465:
             # Port 465 (usually)
-            print("DEBUG: connecting using SMTP_SSL")
+            print(f"DEBUG: connecting using SMTP_SSL (Port={port})")
             server = smtplib.SMTP_SSL(server_host, port, timeout=timeout)
         else:
             # Port 587 (usually) with STARTTLS
-            print("DEBUG: connecting using SMTP")
+            print(f"DEBUG: connecting using SMTP (Port={port})")
             server = smtplib.SMTP(server_host, port, timeout=timeout)
             if settings.MAIL_STARTTLS:
                 print("DEBUG: starting TLS")
