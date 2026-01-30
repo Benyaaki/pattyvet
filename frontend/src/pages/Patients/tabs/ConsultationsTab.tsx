@@ -75,12 +75,16 @@ const getStatusLabel = (status: string) => {
 };
 
 const ConsultationForm = ({ patientId, consultation, onSuccess, onCancel }: any) => {
-    const { register, handleSubmit, reset } = useForm({
+    const { register, handleSubmit, reset, setValue, watch } = useForm({
         defaultValues: consultation ? {
             ...consultation,
             date: consultation.date ? consultation.date.split('T')[0] : ''
-        } : {}
+        } : {
+            status: 'scheduled',
+            date: new Date().toISOString().split('T')[0]
+        }
     });
+    const currentStatus = watch('status');
     const [saving, setSaving] = useState(false);
     const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
 
@@ -140,16 +144,53 @@ const ConsultationForm = ({ patientId, consultation, onSuccess, onCancel }: any)
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Fecha</label>
                                 <input type="date" {...register('date')} className="w-full px-3 py-2 border rounded-md" />
                             </div>
-                            <div className="w-1/3">
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Estado</label>
-                                <select {...register('status')} className="w-full px-3 py-2 border rounded-md">
-                                    <option value="scheduled">Agendada</option>
-                                    <option value="attended">Asistió</option>
-                                    <option value="no_show">No Asistió</option>
-                                    <option value="cancelled">Cancelada</option>
-                                </select>
-                            </div>
                         </div>
+                    </div>
+                </div>
+
+                {/* Attendance Confirmation Section */}
+                <div className="bg-white p-4 rounded-lg border border-gray-200">
+                    <label className="block text-sm font-bold text-gray-900 mb-3">¿Asistió el paciente a la consulta?</label>
+                    <div className="flex flex-wrap gap-3">
+                        <button
+                            type="button"
+                            onClick={() => setValue('status', 'attended')}
+                            className={`flex-1 py-2 px-3 rounded-lg border text-sm font-medium transition-all flex items-center justify-center space-x-2 ${
+                                currentStatus === 'attended'
+                                ? 'bg-green-50 border-green-500 text-green-700 ring-1 ring-green-500'
+                                : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
+                            }`}
+                        >
+                            <span className="w-2 h-2 rounded-full bg-green-500"></span>
+                            <span>Sí, asistió</span>
+                        </button>
+                        
+                        <button
+                            type="button"
+                            onClick={() => setValue('status', 'no_show')}
+                            className={`flex-1 py-2 px-3 rounded-lg border text-sm font-medium transition-all flex items-center justify-center space-x-2 ${
+                                currentStatus === 'no_show'
+                                ? 'bg-red-50 border-red-500 text-red-700 ring-1 ring-red-500'
+                                : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
+                            }`}
+                        >
+                            <span className="w-2 h-2 rounded-full bg-red-500"></span>
+                            <span>No asistió</span>
+                        </button>
+
+                        <button
+                            type="button"
+                            onClick={() => setValue('status', 'scheduled')}
+                            className={`flex-1 py-2 px-3 rounded-lg border text-sm font-medium transition-all flex items-center justify-center space-x-2 ${
+                                currentStatus === 'scheduled' || !currentStatus
+                                ? 'bg-blue-50 border-blue-500 text-blue-700 ring-1 ring-blue-500'
+                                : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
+                            }`}
+                        >
+                            <span className="w-2 h-2 rounded-full bg-blue-500"></span>
+                            <span>Pendiente / No responder</span>
+                        </button>
+                    </div>
                     </div>
                 </div>
                 <div>
@@ -180,7 +221,7 @@ const ConsultationForm = ({ patientId, consultation, onSuccess, onCancel }: any)
                     />
                 </div>
 
-                {/* Image Upload Section */}
+                {/* Image Upload Section */ }
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Imágenes de Consulta</label>
                     <input
@@ -200,8 +241,8 @@ const ConsultationForm = ({ patientId, consultation, onSuccess, onCancel }: any)
                 >
                     {saving ? 'Guardando...' : (consultation ? 'Actualizar Consulta' : 'Guardar Consulta')}
                 </button>
-            </form>
-        </div>
+            </form >
+        </div >
     );
 };
 
