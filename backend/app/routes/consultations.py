@@ -63,6 +63,7 @@ async def create_consultation(
     try:
         tutor = await Tutor.get(patient.tutor_id)
         if tutor and tutor.email:
+            print(f"DEBUG: Attempting to send email to {tutor.email}")
             subject = "Confirmación de Reserva - PattyVet"
             date_str = new_con.date.strftime('%d/%m/%Y %H:%M')
             
@@ -72,6 +73,7 @@ async def create_consultation(
             template = settings.email_templates.get("appointment_confirmation") if settings else None
 
             if template:
+                print("DEBUG: Using custom template")
                 # Use dynamic template
                 formatted_content = template.format(
                     tutor_name=tutor.full_name,
@@ -84,6 +86,7 @@ async def create_consultation(
                 html_content = formatted_content
                 body = formatted_content.replace('<br>', '\n') # specific naive strip for plain text
             else:
+                print("DEBUG: Using default template")
                 # Default Hardcoded
                 body = f"""Hola {tutor.full_name},
 Su hora para {patient.name} ha sido reservada con éxito.
@@ -103,9 +106,14 @@ Motivo: {new_con.reason}
             
             html_body = get_email_template("Reserva Confirmada", html_content)
             
+            print(f"DEBUG: Adding background task for {tutor.email}")
             background_tasks.add_task(send_email_background, tutor.email, subject, body, html_body)
+        else:
+            print(f"DEBUG: Tutor not found or no email. Tutor: {tutor}, Email: {tutor.email if tutor else 'None'}")
     except Exception as e:
-        print(f"Error preparing email: {e}")
+        print(f"DEBUG: Error preparing email: {e}")
+        import traceback
+        traceback.print_exc()
 
     return new_con
 
@@ -133,6 +141,7 @@ async def update_consultation(
             if patient:
                 tutor = await Tutor.get(patient.tutor_id)
                 if tutor and tutor.email:
+                    print(f"DEBUG: Reschedule - Sending email to {tutor.email}")
                     subject = "Tu cita ha sido reagendada - PattyVet"
                     date_str = con.date.strftime('%d/%m/%Y %H:%M')
                     
@@ -150,8 +159,11 @@ async def update_consultation(
                     html_body = get_email_template("Cita Reagendada", html_content)
                     
                     background_tasks.add_task(send_email_background, tutor.email, subject, body, html_body)
+                else:
+                    print("DEBUG: Reschedule - Tutor/Email missing")
         except Exception as e:
             print(f"Error sending reschedule email: {e}")
+
 
     return con
 
