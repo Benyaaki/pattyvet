@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../../api/axios';
 import { Plus, Search, Edit2, Trash2 } from 'lucide-react';
+import { formatPhoneNumber } from '../../utils/formatters';
 
 interface Tutor {
     _id: string;
@@ -99,7 +100,7 @@ const TutorsList = () => {
                                 tutors.map((tutor) => (
                                     <tr key={tutor._id} className="hover:bg-gray-50 transition-colors">
                                         <td className="px-6 py-4 font-medium text-gray-900">{tutor.full_name}</td>
-                                        <td className="px-6 py-4 text-gray-600">{tutor.phone}</td>
+                                        <td className="px-6 py-4 text-gray-600">{formatPhoneNumber(tutor.phone)}</td>
                                         <td className="px-6 py-4 text-gray-600">{tutor.email || '-'}</td>
                                         <td className="px-6 py-4 text-right space-x-2">
                                             <Link

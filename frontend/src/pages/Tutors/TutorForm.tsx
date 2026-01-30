@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigate, useParams } from 'react-router-dom';
 import api from '../../api/axios';
+import { formatPhoneNumber } from '../../utils/formatters';
 
 const schema = z.object({
     full_name: z.string().min(1, "Nombre requerido"),
@@ -20,7 +21,7 @@ const TutorForm = () => {
     const navigate = useNavigate();
     const isEdit = !!id;
 
-    const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<FormData>({
+    const { register, handleSubmit, reset, setValue, formState: { errors, isSubmitting } } = useForm<FormData>({
         resolver: zodResolver(schema),
     });
 
@@ -71,6 +72,11 @@ const TutorForm = () => {
                             <label className="block text-sm font-medium text-gray-700 mb-1">Teléfono *</label>
                             <input
                                 {...register('phone')}
+                                onChange={(e) => {
+                                    const formatted = formatPhoneNumber(e.target.value);
+                                    setValue('phone', formatted);
+                                }}
+                                placeholder="+569 1234 5678"
                                 className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                             />
                             {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone.message}</p>}

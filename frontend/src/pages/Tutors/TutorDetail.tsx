@@ -5,6 +5,7 @@ import {
     Phone, MapPin, Calendar, Activity,
     ArrowLeft, PawPrint, Clock, CheckCircle, XCircle
 } from 'lucide-react';
+import { formatPhoneNumber } from '../../utils/formatters';
 
 const TutorDetail = () => {
     const { id } = useParams();
@@ -69,7 +70,7 @@ const TutorDetail = () => {
                     <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div className="flex items-center space-x-3 text-gray-700 bg-gray-50 p-3 rounded-lg">
                             <Phone className="w-5 h-5 text-primary" />
-                            <span className="font-medium">{tutor.phone}</span>
+                            <span className="font-medium">{formatPhoneNumber(tutor.phone)}</span>
                         </div>
                         <div className="flex items-center space-x-3 text-gray-700 bg-gray-50 p-3 rounded-lg">
                             <MapPin className="w-5 h-5 text-primary" />
