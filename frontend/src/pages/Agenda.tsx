@@ -202,7 +202,7 @@ const Agenda = () => {
                                             className="block w-full text-left text-[10px] bg-white border border-brand-accent/30 text-gray-700 px-1.5 py-1 rounded truncate hover:bg-brand-surface shadow-sm focus:outline-none"
                                             title={`${new Date(ev.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} ${ev.title}`}
                                         >
-                                            <span className="font-bold text-primary">{new Date(ev.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span> {ev.title}
+                                            <span className="font-bold text-primary">{new Date(ev.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}</span> {ev.title}
                                         </button>
                                     ))}
                                 </div>
@@ -239,7 +239,7 @@ const Agenda = () => {
                             >
                                 <div className="flex justify-between items-start mb-1">
                                     <span className="text-sm font-bold text-gray-900">
-                                        {new Date(ev.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                        {new Date(ev.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}
                                     </span>
                                     <span className="text-xs text-blue-600 font-medium bg-blue-100 px-2 py-0.5 rounded-full">
                                         Consulta

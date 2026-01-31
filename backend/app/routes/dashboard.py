@@ -88,11 +88,22 @@ async def get_calendar_events(
     events = []
     for c in consultations:
         patient = await Patient.get(c.patient_id)
+        
+        # Ensure UTC timezone is indicated if naive
+        start_date = c.date
+        end_date = c.date + timedelta(minutes=30)
+        
+        # If naive, assume UTC and append Z. If aware, isoformat will include offset.
+        # But safest for standard JS consumption is forcing ISO with Z if it's really UTC.
+        # Since we use datetime.utcnow(), it is naive but represents UTC.
+        start_str = start_date.isoformat() + 'Z' if start_date.tzinfo is None else start_date.isoformat()
+        end_str = end_date.isoformat() + 'Z' if end_date.tzinfo is None else end_date.isoformat()
+
         events.append({
             "id": str(c.id),
             "title": f"{patient.name} ({patient.species.value if hasattr(patient.species, 'value') else patient.species})" if patient else "Desconocido",
-            "start": c.date,
-            "end": c.date + timedelta(minutes=30), 
+            "start": start_str,
+            "end": end_str, 
             "reason": c.reason,
             "patient_id": str(c.patient_id)
         })
