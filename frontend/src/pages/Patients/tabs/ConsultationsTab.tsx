@@ -84,9 +84,45 @@ const ConsultationForm = ({ patientId, consultation, onSuccess, onCancel }: any)
             date: new Date().toISOString().split('T')[0]
         }
     });
-    // ... hooks ...
+    const currentStatus = watch('status');
+    const [saving, setSaving] = useState(false);
+    const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
 
-    // ... submit ...
+    const onSubmit = async (data: any) => {
+        setSaving(true);
+        try {
+            let consultationId = consultation?._id;
+
+            if (consultation) {
+                await api.put(`/consultations/${consultation._id}`, data);
+                alert('Consulta actualizada');
+            } else {
+                const res = await api.post('/consultations', { ...data, patient_id: patientId });
+                consultationId = res.data._id;
+                alert('Consulta creada');
+            }
+
+            // Upload files if any
+            if (selectedFiles && selectedFiles.length > 0 && consultationId) {
+                const filePromises = Array.from(selectedFiles).map(file => {
+                    const formData = new FormData();
+                    formData.append('file', file);
+                    return api.post(`/consultations/${consultationId}/files`, formData, {
+                        headers: { 'Content-Type': 'multipart/form-data' }
+                    });
+                });
+                await Promise.all(filePromises);
+            }
+
+            reset();
+            onSuccess();
+        } catch (error) {
+            console.error(error);
+            alert('Error al guardar consulta o archivos');
+        } finally {
+            setSaving(false);
+        }
+    };
 
     return (
         <div className="bg-gray-50 p-6 rounded-lg border mb-6">
