@@ -5,7 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
-import { Mail, Lock, AlertCircle, ArrowRight, Eye, EyeOff } from 'lucide-react';
+import { Mail, AlertCircle, ArrowRight, Eye, EyeOff } from 'lucide-react';
 
 const schema = z.object({
     email: z.string().email("Email inválido"),
