@@ -75,9 +75,54 @@ const getStatusLabel = (status: string) => {
 };
 
 const ConsultationForm = ({ patientId, consultation, onSuccess, onCancel, className }: any) => {
-    // ... hooks ...
+    const { register, handleSubmit, reset, setValue, watch } = useForm({
+        defaultValues: consultation ? {
+            ...consultation,
+            date: consultation.date ? consultation.date.split('T')[0] : ''
+        } : {
+            status: 'scheduled',
+            date: new Date().toISOString().split('T')[0]
+        }
+    });
+    const currentStatus = watch('status');
+    const [saving, setSaving] = useState(false);
+    const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
 
-    // ... submit logic ...
+    const onSubmit = async (data: any) => {
+        setSaving(true);
+        try {
+            let consultationId = consultation?._id;
+
+            if (consultation) {
+                await api.put(`/consultations/${consultation._id}`, data);
+                alert('Consulta actualizada');
+            } else {
+                const res = await api.post('/consultations', { ...data, patient_id: patientId });
+                consultationId = res.data._id;
+                alert('Consulta creada');
+            }
+
+            // Upload files if any
+            if (selectedFiles && selectedFiles.length > 0 && consultationId) {
+                const filePromises = Array.from(selectedFiles).map(file => {
+                    const formData = new FormData();
+                    formData.append('file', file);
+                    return api.post(`/consultations/${consultationId}/files`, formData, {
+                        headers: { 'Content-Type': 'multipart/form-data' }
+                    });
+                });
+                await Promise.all(filePromises);
+            }
+
+            reset();
+            onSuccess();
+        } catch (error) {
+            console.error(error);
+            alert('Error al guardar consulta o archivos');
+        } finally {
+            setSaving(false);
+        }
+    };
 
     const containerClass = className !== undefined
         ? className
