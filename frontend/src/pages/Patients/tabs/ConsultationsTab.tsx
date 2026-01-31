@@ -74,7 +74,7 @@ const getStatusLabel = (status: string) => {
     }
 };
 
-const ConsultationForm = ({ patientId, consultation, onSuccess, onCancel, className }: any) => {
+const ConsultationForm = ({ patientId, consultation, onSuccess, onCancel }: any) => {
     const { register, handleSubmit, reset, setValue, watch } = useForm({
         defaultValues: consultation ? {
             ...consultation,
@@ -84,52 +84,12 @@ const ConsultationForm = ({ patientId, consultation, onSuccess, onCancel, classN
             date: new Date().toISOString().split('T')[0]
         }
     });
-    const currentStatus = watch('status');
-    const [saving, setSaving] = useState(false);
-    const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
+    // ... hooks ...
 
-    const onSubmit = async (data: any) => {
-        setSaving(true);
-        try {
-            let consultationId = consultation?._id;
-
-            if (consultation) {
-                await api.put(`/consultations/${consultation._id}`, data);
-                alert('Consulta actualizada');
-            } else {
-                const res = await api.post('/consultations', { ...data, patient_id: patientId });
-                consultationId = res.data._id;
-                alert('Consulta creada');
-            }
-
-            // Upload files if any
-            if (selectedFiles && selectedFiles.length > 0 && consultationId) {
-                const filePromises = Array.from(selectedFiles).map(file => {
-                    const formData = new FormData();
-                    formData.append('file', file);
-                    return api.post(`/consultations/${consultationId}/files`, formData, {
-                        headers: { 'Content-Type': 'multipart/form-data' }
-                    });
-                });
-                await Promise.all(filePromises);
-            }
-
-            reset();
-            onSuccess();
-        } catch (error) {
-            console.error(error);
-            alert('Error al guardar consulta o archivos');
-        } finally {
-            setSaving(false);
-        }
-    };
-
-    const containerClass = className !== undefined
-        ? className
-        : "bg-gray-50 p-6 rounded-lg border mb-6";
+    // ... submit ...
 
     return (
-        <div className={containerClass}>
+        <div className="bg-gray-50 p-6 rounded-lg border mb-6">
             <div className="flex justify-between mb-4">
                 <h4 className="font-bold text-gray-900">{consultation ? 'Editar Consulta' : 'Registrar Consulta'}</h4>
                 {onCancel && (
@@ -271,12 +231,11 @@ const ConsultationCard = ({ consultation, onDelete, defaultExpanded, onClearSele
 
     if (isEditing) {
         return (
-            <div ref={formRef} className="bg-gray-50 border rounded-lg shadow-md overflow-hidden mb-4">
+            <div ref={formRef} className="bg-white border rounded-lg shadow-md overflow-hidden">
                 <ConsultationForm
                     consultation={consultation}
                     onSuccess={() => { setIsEditing(false); onDelete(); if (onClearSelection) onClearSelection(); }}
                     onCancel={() => { setIsEditing(false); if (onClearSelection) onClearSelection(); }}
-                    className="" // Clean style for embedded
                 />
             </div>
         );
