@@ -132,11 +132,7 @@ const Login = () => {
                             {!isSubmitting && <ArrowRight className="w-5 h-5" />}
                         </button>
 
-                        <div className="mt-8 pt-6 border-t border-gray-100 text-center">
-                            <p className="text-xs text-gray-400">
-                                Default: admin@paty.vet / admin
-                            </p>
-                        </div>
+
                     </form>
                 </div>
             </div>
