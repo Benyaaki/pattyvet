@@ -79,6 +79,14 @@ async def get_prescription(id: str, user = Depends(get_current_user)):
         raise HTTPException(status_code=404, detail="Prescription not found")
     return p
 
+@router.delete("/{id}")
+async def delete_prescription(id: str, user = Depends(get_current_user)):
+    p = await Prescription.get(id)
+    if not p:
+        raise HTTPException(status_code=404, detail="Prescription not found")
+    await p.delete()
+    return {"message": "Deleted"}
+
 from app.models.tutor import Tutor
 
 @router.get("/{id}/pdf")

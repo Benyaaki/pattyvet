@@ -30,6 +30,17 @@ const PrescriptionsTab = ({ patientId }: { patientId: string }) => {
         }
     };
 
+    const handleDelete = async (id: string) => {
+        if (confirm('¿Eliminar receta médica?')) {
+            try {
+                await api.delete(`/prescriptions/${id}`);
+                fetchPrescriptions();
+            } catch {
+                alert('Error al eliminar');
+            }
+        }
+    };
+
     return (
         <div className="space-y-6">
             <div className="flex justify-between items-center">
@@ -68,6 +79,13 @@ const PrescriptionsTab = ({ patientId }: { patientId: string }) => {
                             >
                                 <Printer className="w-5 h-5 mb-1" />
                                 <span className="text-[10px] font-bold">PDF</span>
+                            </button>
+                            <button
+                                onClick={() => handleDelete(p._id)}
+                                className="text-red-500 hover:bg-red-50 p-2 rounded-lg"
+                                title="Eliminar receta"
+                            >
+                                <Trash2 className="w-5 h-5" />
                             </button>
                         </div>
                     </div>
