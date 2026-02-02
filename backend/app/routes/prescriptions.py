@@ -244,12 +244,12 @@ async def generate_prescription_pdf(id: str, user = Depends(get_current_user)):
                     # Position: Further to the right, larger, and higher up
                     # Moving to x=150 for more separation from "Firma:"
                     # Larger size: 350x140 for better visibility
-                    # Higher position: y_footer + 5
+                    # Higher position: y_footer + 20 (moved up more)
                     
                     sig_width = 350 
                     sig_height = 140
                     x_sig = 150  # Further to the right
-                    y_sig = y_footer + 5  # Higher up
+                    y_sig = y_footer + 20  # Higher up
                     
                     c.drawImage(sig_path, x_sig, y_sig, width=sig_width, height=sig_height, mask='auto', preserveAspectRatio=True, anchorAtXY=True)
         except Exception as e:
