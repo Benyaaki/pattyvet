@@ -241,14 +241,14 @@ async def generate_prescription_pdf(id: str, user = Depends(get_current_user)):
                 
                 if os.path.exists(sig_path):
                     # Draw signature
-                    # Position: To the right of "Firma:" (which is at x=40)
-                    # "Firma:" width is approx 35-40pts. Let's start at x=90 to give space.
-                    # Increase size: width 150->250, height 60->100
+                    # Position: Well to the right of "Firma:" to avoid overlap
+                    # "Firma:" is at x=40, text width ~50pts. Start at x=120 for clear separation.
+                    # Larger size for better visibility: 300x120
                     
-                    sig_width = 250 
-                    sig_height = 100
-                    x_sig = 90
-                    y_sig = y_footer - 10 # Start slightly below/aligned with text baseline
+                    sig_width = 300 
+                    sig_height = 120
+                    x_sig = 120  # More to the right
+                    y_sig = y_footer - 15  # Slightly lower to center better
                     
                     c.drawImage(sig_path, x_sig, y_sig, width=sig_width, height=sig_height, mask='auto', preserveAspectRatio=True, anchorAtXY=True)
         except Exception as e:
