@@ -33,7 +33,7 @@ const MainLayout = () => {
             {/* Mobile Header */}
             <div className="md:hidden fixed top-0 w-full bg-brand-surface z-20 shadow-sm border-b px-4 py-3 flex items-center justify-between">
                 <div className="flex items-center space-x-2">
-                    <img src="/img/logo.png" alt="PattyVet" className="h-8 w-auto object-contain" />
+                    <img src="/logo_navbar.png" alt="PattyVet" className="h-8 w-auto object-contain" />
                     <span className="font-bold text-gray-800">PattyVet</span>
                 </div>
                 <button
