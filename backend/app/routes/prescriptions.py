@@ -219,39 +219,27 @@ async def generate_prescription_pdf(id: str, user = Depends(get_current_user)):
     # --- Footer ---
     y_footer = 50 
     
-    # --- Place Signature ---
-    # Logic: Prioritize prescription's stored signature, fallback to current user's signature
-    from app.models.file_record import FileRecord
-    from app.core.config import settings as app_settings
+    # --- Place Default Signature ---
+    # Use the default firma.png signature for all prescriptions
+    import os
     
-    signature_id = p.signature_file_id or user.signature_file_id
+    # Path to the default signature image
+    sig_path = os.path.join(os.path.dirname(__file__), "..", "..", "static", "img", "firma.png")
     
-    if signature_id:
+    if os.path.exists(sig_path):
         try:
-            # Check if signature_id is a valid ObjectId before querying? 
-            # It's stored as str in user.signature_file_id, but might need conversion if querying by _id
-            # Assuming FileRecord.get takes the string ID if it's the primary key
+            # Draw signature
+            # Position: Further to the right, larger, and higher up
+            # Moving to x=150 for more separation from "Firma:"
+            # Larger size: 350x140 for better visibility
+            # Higher position: y_footer + 20 (moved up more)
             
-            # FileRecord is a beanie Document, .get() usually takes PydanticObjectId or string representation
-            sig_file = await FileRecord.get(signature_id)
+            sig_width = 350 
+            sig_height = 140
+            x_sig = 150  # Further to the right
+            y_sig = y_footer + 20  # Higher up
             
-            if sig_file:
-                # Construct path
-                sig_path = os.path.join(app_settings.UPLOAD_DIR, sig_file.path)
-                
-                if os.path.exists(sig_path):
-                    # Draw signature
-                    # Position: Further to the right, larger, and higher up
-                    # Moving to x=150 for more separation from "Firma:"
-                    # Larger size: 350x140 for better visibility
-                    # Higher position: y_footer + 20 (moved up more)
-                    
-                    sig_width = 350 
-                    sig_height = 140
-                    x_sig = 150  # Further to the right
-                    y_sig = y_footer + 20  # Higher up
-                    
-                    c.drawImage(sig_path, x_sig, y_sig, width=sig_width, height=sig_height, mask='auto', preserveAspectRatio=True, anchorAtXY=True)
+            c.drawImage(sig_path, x_sig, y_sig, width=sig_width, height=sig_height, mask='auto', preserveAspectRatio=True, anchorAtXY=True)
         except Exception as e:
             print(f"Error loading signature: {e}")
             pass
