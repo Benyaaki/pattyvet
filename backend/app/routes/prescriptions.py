@@ -233,17 +233,16 @@ async def generate_prescription_pdf(id: str, user = Depends(get_current_user)):
                 
                 if os.path.exists(sig_path):
                     # Draw signature
-                    # Position: Above "Firma:" at (40, 50). 
-                    # Let's say (40, 65) with a reasonable width/height
-                    # Maintain aspect ratio?
-                    # For now, fix width to e.g. 150, height auto or fixed max
+                    # Position: To the right of "Firma:" (which is at x=40)
+                    # "Firma:" width is approx 35-40pts. Let's start at x=90 to give space.
+                    # Increase size: width 150->250, height 60->100
                     
-                    # Using fixed box for signature
-                    sig_width = 150
-                    sig_height = 60
-                    # x = 40, y = y_footer + 15
+                    sig_width = 250 
+                    sig_height = 100
+                    x_sig = 90
+                    y_sig = y_footer - 10 # Start slightly below/aligned with text baseline
                     
-                    c.drawImage(sig_path, 40, y_footer + 10, width=sig_width, height=sig_height, mask='auto', preserveAspectRatio=True, anchorAtXY=True)
+                    c.drawImage(sig_path, x_sig, y_sig, width=sig_width, height=sig_height, mask='auto', preserveAspectRatio=True, anchorAtXY=True)
         except Exception as e:
             print(f"Error loading signature: {e}")
             pass
