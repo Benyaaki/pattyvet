@@ -59,6 +59,11 @@ async def update_tutor(id: str, update_data: TutorUpdate, user = Depends(get_cur
     await tutor.set(update_data.model_dump(exclude_unset=True))
     return tutor
 
+@router.delete("/{id}")
+async def delete_tutor(id: str, user = Depends(get_current_user)):
+    tutor = await Tutor.get(id)
+    if not tutor:
+        raise HTTPException(status_code=404, detail="Tutor not found")
     
     await tutor.delete()
     return {"message": "Tutor deleted"}
