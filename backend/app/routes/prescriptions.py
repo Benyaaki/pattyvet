@@ -114,10 +114,6 @@ async def generate_prescription_pdf(id: str, user = Depends(get_current_user)):
         pass # Fallback to no background if missing
 
     # --- Header Bar (Cyan) ---
-    # Attempt to match the "blue bar" look if the background doesn't provide it strictly enough, 
-    # OR assuming the simple background needs overlaid text.
-    # Based on reference image, there is a distinct header area.
-    # We will draw the TEXT over the assumed header area.
     c.setFillColor(colors.white) # Assuming white text on blue background for header (if visible over wave)
     # The Date on the top right
     c.setFont("Helvetica-Bold", 12)
@@ -214,6 +210,44 @@ async def generate_prescription_pdf(id: str, user = Depends(get_current_user)):
         
     # --- Footer ---
     y_footer = 50 
+    
+    # --- Place Signature ---
+    # Logic: Prioritize prescription's stored signature, fallback to current user's signature
+    from app.models.file_record import FileRecord
+    from app.core.config import settings as app_settings
+    
+    signature_id = p.signature_file_id or user.signature_file_id
+    
+    if signature_id:
+        try:
+            # Check if signature_id is a valid ObjectId before querying? 
+            # It's stored as str in user.signature_file_id, but might need conversion if querying by _id
+            # Assuming FileRecord.get takes the string ID if it's the primary key
+            
+            # FileRecord is a beanie Document, .get() usually takes PydanticObjectId or string representation
+            sig_file = await FileRecord.get(signature_id)
+            
+            if sig_file:
+                # Construct path
+                sig_path = os.path.join(app_settings.UPLOAD_DIR, sig_file.path)
+                
+                if os.path.exists(sig_path):
+                    # Draw signature
+                    # Position: Above "Firma:" at (40, 50). 
+                    # Let's say (40, 65) with a reasonable width/height
+                    # Maintain aspect ratio?
+                    # For now, fix width to e.g. 150, height auto or fixed max
+                    
+                    # Using fixed box for signature
+                    sig_width = 150
+                    sig_height = 60
+                    # x = 40, y = y_footer + 15
+                    
+                    c.drawImage(sig_path, 40, y_footer + 10, width=sig_width, height=sig_height, mask='auto', preserveAspectRatio=True, anchorAtXY=True)
+        except Exception as e:
+            print(f"Error loading signature: {e}")
+            pass
+
     c.setFillColor(colors.white) # Match date color
     c.setFont("Helvetica-Bold", 11)
     # Only "Firma:" as requested
@@ -234,4 +268,5 @@ async def generate_prescription_pdf(id: str, user = Depends(get_current_user)):
     
     buffer.seek(0)
     return Response(content=buffer.getvalue(), media_type="application/pdf", headers={"Content-Disposition": f"attachment; filename=receta_{patient.name}.pdf"})
+
 
