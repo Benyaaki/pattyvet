@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
-import { Upload, Plus, Trash, Settings as SettingsIcon, Users, Calendar, Mail, Stethoscope } from 'lucide-react';
+import { Trash, Settings as SettingsIcon, Users, Calendar, Mail } from 'lucide-react';
 
 /* --- Sub-Components --- */
 
@@ -18,140 +18,7 @@ const TabButton = ({ id, icon: Icon, label, active, set }: any) => (
     </button>
 );
 
-const GeneralSettings = ({ user }: any) => {
-    const { register, handleSubmit, reset } = useForm();
-    const [signatureFile, setSignatureFile] = useState<File | null>(null);
-    const [saving, setSaving] = useState(false);
 
-    useEffect(() => {
-        api.get('/settings').then(({ data }) => reset(data));
-    }, [reset]);
-
-    const onSubmit = async (data: any) => {
-        setSaving(true);
-        try {
-            await api.put('/settings', data);
-            if (signatureFile) {
-                const formData = new FormData();
-                formData.append('file', signatureFile);
-                await api.post('/settings/signature', formData, {
-                    headers: { 'Content-Type': 'multipart/form-data' }
-                });
-            }
-            alert('Ajustes guardados');
-        } catch {
-            alert('Error');
-        } finally {
-            setSaving(false);
-        }
-    };
-
-    return (
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            <h2 className="text-xl font-bold text-gray-800 border-b pb-2">Información General</h2>
-            <div className="space-y-4">
-                <div>
-                    <label className="label">Nombre Clínica</label>
-                    <input {...register('clinic_name')} className="input" />
-                </div>
-                <div>
-                    <label className="label">Dirección</label>
-                    <input {...register('address')} className="input" />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                    <div>
-                        <label className="label">Teléfono</label>
-                        <input {...register('phone')} className="input" />
-                    </div>
-                    <div>
-                        <label className="label">Email</label>
-                        <input {...register('email')} className="input" />
-                    </div>
-                </div>
-                <div>
-                    <label className="label">Ciudad</label>
-                    <input {...register('city')} className="input" />
-                </div>
-            </div>
-
-            <div className="pt-6 border-t space-y-4">
-                <h3 className="text-lg font-medium text-gray-900">Firma Digital</h3>
-                <div className="flex items-center space-x-4">
-                    <label className="cursor-pointer bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-lg font-medium flex items-center shadow-sm">
-                        <Upload className="w-4 h-4 mr-2" />
-                        {signatureFile ? 'Cambiar Archivo' : 'Subir Firma (Imagen)'}
-                        <input type="file" accept="image/*" className="hidden" onChange={(e) => setSignatureFile(e.target.files?.[0] || null)} />
-                    </label>
-                    {signatureFile && <span className="text-sm text-green-600 font-medium">{signatureFile.name}</span>}
-                    {!signatureFile && user?.signature_file_id && <span className="text-sm text-gray-500">Firma actual guardada</span>}
-                </div>
-            </div>
-
-            <div className="flex justify-end pt-4">
-                <button type="submit" disabled={saving} className="btn-primary">
-                    {saving ? 'Guardando...' : 'Guardar Cambios'}
-                </button>
-            </div>
-        </form>
-    );
-};
-
-const ServicesSettings = () => {
-    const [services, setServices] = useState<any[]>([]);
-    const { register, handleSubmit, reset } = useForm();
-
-    const fetchServices = () => api.get('/services').then(({ data }) => setServices(data));
-
-    useEffect(() => { fetchServices(); }, []);
-
-    const onSubmit = async (data: any) => {
-        await api.post('/services', { ...data, price: Number(data.price), category: 'General' });
-        reset();
-        fetchServices();
-    };
-
-    const handleDelete = async (id: string) => {
-        if (confirm('¿Eliminar servicio?')) {
-            await api.delete(`/services/${id}`);
-            fetchServices();
-        }
-    };
-
-    return (
-        <div className="space-y-6">
-            <h2 className="text-xl font-bold text-gray-800 border-b pb-2">Servicios y Lista de Precios</h2>
-
-            <form onSubmit={handleSubmit(onSubmit)} className="bg-gray-50 p-4 rounded-lg flex gap-4 items-end">
-                <div className="flex-1">
-                    <label className="label">Nombre del Servicio</label>
-                    <input {...register('name')} className="input" placeholder="Ej. Consulta General" required />
-                </div>
-                <div className="w-32">
-                    <label className="label">Precio</label>
-                    <input {...register('price')} type="number" className="input" placeholder="0" required />
-                </div>
-                <button type="submit" className="btn-primary h-[42px] aspect-square flex items-center justify-center">
-                    <Plus className="w-5 h-5" />
-                </button>
-            </form>
-
-            <div className="space-y-2">
-                {services.map(s => (
-                    <div key={s._id} className="flex justify-between items-center p-3 bg-white border rounded-lg hover:shadow-sm">
-                        <div>
-                            <p className="font-medium text-gray-900">{s.name}</p>
-                            <p className="text-sm text-gray-500">${s.price.toLocaleString()}</p>
-                        </div>
-                        <button onClick={() => handleDelete(s._id)} className="text-red-400 hover:text-red-600 p-2">
-                            <Trash className="w-4 h-4" />
-                        </button>
-                    </div>
-                ))}
-                {services.length === 0 && <p className="text-center text-gray-400 py-4">No hay servicios registrados.</p>}
-            </div>
-        </div>
-    );
-};
 
 const TemplatesSettings = () => {
     const { register, handleSubmit, setValue } = useForm();
@@ -316,7 +183,7 @@ const UsersSettings = ({ currentUser }: any) => {
 
 const Settings = () => {
     const { user } = useAuth();
-    const [activeTab, setActiveTab] = useState('general');
+    const [activeTab, setActiveTab] = useState('schedule');
 
     return (
         <div className="max-w-4xl mx-auto pb-10">
@@ -331,18 +198,14 @@ const Settings = () => {
                 {/* Sidebar Navigation */}
                 <div className="w-full md:w-64 bg-gray-50 border-r border-gray-100 flex-shrink-0">
                     <nav className="p-4 space-y-1">
-                        <TabButton id="general" icon={SettingsIcon} label="General" active={activeTab} set={setActiveTab} />
-                        <TabButton id="services" icon={Stethoscope} label="Servicios y Precios" active={activeTab} set={setActiveTab} />
-                        <TabButton id="templates" icon={Mail} label="Plantillas de Correo" active={activeTab} set={setActiveTab} />
                         <TabButton id="schedule" icon={Calendar} label="Horarios" active={activeTab} set={setActiveTab} />
+                        <TabButton id="templates" icon={Mail} label="Plantillas de Correo" active={activeTab} set={setActiveTab} />
                         <TabButton id="users" icon={Users} label="Usuarios y Acceso" active={activeTab} set={setActiveTab} />
                     </nav>
                 </div>
 
                 {/* Content Area */}
                 <div className="flex-1 p-8 overflow-y-auto">
-                    {activeTab === 'general' && <GeneralSettings user={user} />}
-                    {activeTab === 'services' && <ServicesSettings />}
                     {activeTab === 'templates' && <TemplatesSettings />}
                     {activeTab === 'schedule' && <ScheduleSettings />}
                     {activeTab === 'users' && <UsersSettings currentUser={user} />}
