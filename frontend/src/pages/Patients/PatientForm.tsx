@@ -4,7 +4,7 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigate, useParams } from 'react-router-dom';
 import api from '../../api/axios';
-import { DogBreeds } from '../../data/dogBreeds';
+import { DogBreeds, CatBreeds } from '../../data/breeds';
 
 // Schema with refinement for conditional validation
 const schema = z.object({
@@ -12,6 +12,7 @@ const schema = z.object({
     species: z.string().min(1, "Especie requerida"), // Changed to generic string to support "Otro" logic better if needed, but keeping enum values in UI
     custom_species: z.string().optional(),
     breed: z.string().optional(),
+    custom_breed: z.string().optional(),
     sex: z.string().min(1, "Sexo requerido"),
     color: z.string().min(1, "Color requerido"),
     birth_date: z.string().optional(),
@@ -37,6 +38,15 @@ const schema = z.object({
                 message: "Raza requerida",
             });
         }
+        if (data.breed === 'Otro') {
+            if (!data.custom_breed || data.custom_breed.length < 1) {
+                ctx.addIssue({
+                    code: z.ZodIssueCode.custom,
+                    path: ['custom_breed'],
+                    message: "Especifique la raza",
+                });
+            }
+        }
     }
 });
 
@@ -58,10 +68,23 @@ const PatientForm = () => {
     const selectedBreed = watch('breed');
 
     // Derived lists
-    const breedList = selectedSpecies === 'Perro' ? Object.keys(DogBreeds).sort() : [];
-    const colorList = (selectedSpecies === 'Perro' && selectedBreed && DogBreeds[selectedBreed])
-        ? DogBreeds[selectedBreed]
+    const breedList = selectedSpecies === 'Perro' || selectedSpecies === 'Gato'
+        ? (() => {
+            const source = selectedSpecies === 'Perro' ? DogBreeds : CatBreeds;
+            const keys = Object.keys(source).filter(k => k !== 'Otro').sort();
+            return [...keys, 'Otro'];
+        })()
         : [];
+
+    const colorList = (() => {
+        if (selectedSpecies === 'Perro' && selectedBreed && DogBreeds[selectedBreed]) {
+            return DogBreeds[selectedBreed];
+        }
+        if (selectedSpecies === 'Gato' && selectedBreed && CatBreeds[selectedBreed]) {
+            return CatBreeds[selectedBreed];
+        }
+        return [];
+    })();
 
     useEffect(() => {
         api.get('/tutors?limit=100').then(({ data }) => setTutors(data));
@@ -103,10 +126,12 @@ const PatientForm = () => {
             // Implementation: We will send `species` as the custom text if it was 'Otro'.
 
             const finalSpecies = data.species === 'Otro' ? data.custom_species : data.species;
+            const finalBreed = data.breed === 'Otro' ? data.custom_breed : data.breed;
 
             const payload = {
                 ...data,
                 species: finalSpecies,
+                breed: finalBreed,
                 tutor2_id: data.tutor2_id || null,
                 weight: Number(data.weight) || 0
             };
@@ -146,6 +171,7 @@ const PatientForm = () => {
                                     setValue('breed', ''); // Reset breed
                                     setValue('color', '');
                                     setValue('custom_species', ''); // Reset custom
+                                    setValue('custom_breed', '');
                                     setIsCustomColor(false);
                                 }}>
                                     <option value="Perro">Perro</option>
@@ -170,17 +196,25 @@ const PatientForm = () => {
                             ) : (
                                 <div>
                                     <label className="label">Raza *</label>
-                                    {selectedSpecies === 'Perro' ? (
-                                        <select {...register('breed')} className="input" onChange={(e) => {
-                                            setValue('breed', e.target.value);
-                                            setValue('color', '');
-                                            setIsCustomColor(false);
-                                        }}>
-                                            <option value="">Seleccionar Raza...</option>
-                                            {breedList.map(breed => (
-                                                <option key={breed} value={breed}>{breed}</option>
-                                            ))}
-                                        </select>
+                                    {(selectedSpecies === 'Perro' || selectedSpecies === 'Gato') ? (
+                                        <>
+                                            <select {...register('breed')} className="input" onChange={(e) => {
+                                                setValue('breed', e.target.value);
+                                                setValue('color', '');
+                                                setIsCustomColor(false);
+                                            }}>
+                                                <option value="">Seleccionar Raza...</option>
+                                                {breedList.map(breed => (
+                                                    <option key={breed} value={breed}>{breed}</option>
+                                                ))}
+                                            </select>
+                                            {selectedBreed === 'Otro' && (
+                                                <div className="mt-2">
+                                                    <input {...register('custom_breed')} className="input" placeholder="Especifique la raza" autoFocus />
+                                                    {errors.custom_breed && <span className="error">{errors.custom_breed.message}</span>}
+                                                </div>
+                                            )}
+                                        </>
                                     ) : (
                                         <input {...register('breed')} className="input" placeholder="Ej. Siames / Común" />
                                     )}
