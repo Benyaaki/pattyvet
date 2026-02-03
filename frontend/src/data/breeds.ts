@@ -106,7 +106,7 @@ export const DogBreeds: Record<string, string[]> = {
     "Pastor Belga Malinois": ["Leonado carbonado con máscara negra"],
     "Pastor Belga Tervueren": ["Leonado carbonado", "Gris carbonado"],
     "Pastor Blanco Suizo": ["Blanco"],
-    "Pastor Inglés (Viejo Pastor Inglés)": ["Gris", "Grisaceo", "Azul", "Blue Merle", "Con o sin marcas blancas"],
+    "Pastor Inglés": ["Gris", "Grisaceo", "Azul", "Blue Merle", "Con o sin marcas blancas"],
     "Pastor de Shetland (Sheltie)": ["Sable", "Tricolor", "Blue Merle", "Negro y Blanco", "Negro y Fuego"],
     "Pequinés": ["Cualquier color y marcas"],
     "Perro de Agua Español": ["Blanco", "Negro", "Marrón", "Bicolor (Blanco y Negro/Marrón)"],
