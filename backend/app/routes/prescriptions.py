@@ -87,6 +87,19 @@ async def delete_prescription(id: str, user = Depends(get_current_user)):
     await p.delete()
     return {"message": "Deleted"}
 
+@router.put("/{id}", response_model=Prescription)
+async def update_prescription(id: str, data: PrescriptionUpdate, user = Depends(get_current_user)):
+    p = await Prescription.get(id)
+    if not p:
+        raise HTTPException(status_code=404, detail="Prescription not found")
+    
+    req = {k: v for k, v in data.model_dump().items() if v is not None}
+    
+    if req:
+       await p.set(req)
+       
+    return p
+
 from app.models.tutor import Tutor
 
 @router.get("/{id}/pdf")
@@ -253,7 +266,7 @@ async def generate_prescription_pdf(id: str, user = Depends(get_current_user)):
     y_doc_info = y_footer + 10 # Up a bit
     x_doc_info = width - 30 # Right a bit more (margin 40 -> 30)
     
-    c.drawRightString(x_doc_info, y_doc_info, "Dra. Patty Pizarro Espina")
+    c.drawRightString(x_doc_info, y_doc_info, "Dra. Patricia Pizarro Espina")
     c.setFont("Helvetica", 9)
     c.drawRightString(x_doc_info, y_doc_info - 12, "Médico Veterinario")
     c.drawRightString(x_doc_info, y_doc_info - 24, "Patty.pizarroespina@gmail.com")

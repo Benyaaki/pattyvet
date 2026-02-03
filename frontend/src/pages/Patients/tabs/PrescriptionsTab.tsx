@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 import api from '../../../api/axios';
-import { Plus, Trash2, Printer } from 'lucide-react';
+import { Plus, Trash2, Printer, Edit } from 'lucide-react';
 import { useForm, useFieldArray } from 'react-hook-form';
 
 const PrescriptionsTab = ({ patientId }: { patientId: string }) => {
     const [prescriptions, setPrescriptions] = useState<any[]>([]);
     const [showForm, setShowForm] = useState(false);
+    const [editingPrescription, setEditingPrescription] = useState<any>(null);
 
     const fetchPrescriptions = () => {
         api.get(`/prescriptions/patient/${patientId}`).then(({ data }) => setPrescriptions(data));
@@ -41,12 +42,25 @@ const PrescriptionsTab = ({ patientId }: { patientId: string }) => {
         }
     };
 
+    const handleEdit = (prescription: any) => {
+        setEditingPrescription(prescription);
+        setShowForm(true);
+    };
+
+    const handleCloseForm = () => {
+        setShowForm(false);
+        setEditingPrescription(null);
+    };
+
     return (
         <div className="space-y-6">
             <div className="flex justify-between items-center">
                 <h3 className="text-lg font-bold text-gray-900">Recetas Médicas</h3>
                 <button
-                    onClick={() => setShowForm(!showForm)}
+                    onClick={() => {
+                        setEditingPrescription(null);
+                        setShowForm(!showForm)
+                    }}
                     className="bg-primary hover:opacity-90 text-white px-3 py-2 rounded-lg text-sm flex items-center space-x-2"
                 >
                     <Plus className="w-4 h-4" />
@@ -55,7 +69,12 @@ const PrescriptionsTab = ({ patientId }: { patientId: string }) => {
             </div>
 
             {showForm && (
-                <PrescriptionForm patientId={patientId} onSuccess={() => { setShowForm(false); fetchPrescriptions(); }} />
+                <PrescriptionForm
+                    patientId={patientId}
+                    initialData={editingPrescription}
+                    onSuccess={() => { handleCloseForm(); fetchPrescriptions(); }}
+                    onCancel={handleCloseForm}
+                />
             )}
 
             <div className="space-y-4">
@@ -81,6 +100,13 @@ const PrescriptionsTab = ({ patientId }: { patientId: string }) => {
                                 <span className="text-[10px] font-bold">PDF</span>
                             </button>
                             <button
+                                onClick={() => handleEdit(p)}
+                                className="text-yellow-600 hover:bg-yellow-50 p-2 rounded-lg"
+                                title="Editar"
+                            >
+                                <Edit className="w-5 h-5" />
+                            </button>
+                            <button
                                 onClick={() => handleDelete(p._id)}
                                 className="text-red-500 hover:bg-red-50 p-2 rounded-lg"
                                 title="Eliminar receta"
@@ -95,9 +121,9 @@ const PrescriptionsTab = ({ patientId }: { patientId: string }) => {
     );
 };
 
-const PrescriptionForm = ({ patientId, onSuccess }: any) => {
+const PrescriptionForm = ({ patientId, onSuccess, initialData, onCancel }: any) => {
     const { register, control, handleSubmit } = useForm({
-        defaultValues: {
+        defaultValues: initialData || {
             items: [{ medication: '', dose: '', frequency: '', duration: '', instructions: '' }],
             general_instructions: ''
         }
@@ -109,7 +135,11 @@ const PrescriptionForm = ({ patientId, onSuccess }: any) => {
 
     const onSubmit = async (data: any) => {
         try {
-            await api.post('/prescriptions', { ...data, patient_id: patientId });
+            if (initialData) {
+                await api.put(`/prescriptions/${initialData._id}`, data);
+            } else {
+                await api.post('/prescriptions', { ...data, patient_id: patientId });
+            }
             onSuccess();
         } catch {
             alert('Error');
@@ -118,7 +148,7 @@ const PrescriptionForm = ({ patientId, onSuccess }: any) => {
 
     return (
         <div className="bg-gray-50 p-6 rounded-lg border mb-8">
-            <h4 className="font-bold text-gray-900 mb-4">Nueva Receta</h4>
+            <h4 className="font-bold text-gray-900 mb-4">{initialData ? 'Editar Receta' : 'Nueva Receta'}</h4>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                 <div className="space-y-3">
                     {fields.map((field, index) => (
@@ -148,8 +178,9 @@ const PrescriptionForm = ({ patientId, onSuccess }: any) => {
                     <textarea {...register('general_instructions')} className="w-full px-3 py-2 border rounded" rows={2} />
                 </div>
 
-                <div className="flex justify-end pt-2">
-                    <button type="submit" className="bg-primary text-white px-6 py-2 rounded-lg font-medium hover:opacity-90">Emitir Receta</button>
+                <div className="flex justify-end pt-2 space-x-2">
+                    <button type="button" onClick={onCancel} className="px-4 py-2 border rounded-lg text-gray-600 hover:bg-gray-100">Cancelar</button>
+                    <button type="submit" className="bg-primary text-white px-6 py-2 rounded-lg font-medium hover:opacity-90">{initialData ? 'Actualizar' : 'Emitir'}</button>
                 </div>
             </form>
         </div>
